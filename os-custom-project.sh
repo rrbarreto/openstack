@@ -157,7 +157,7 @@ network_create() {
                         echo "==> Base network was created"
                 fi
         else
-                echo "==> Base network does NOT created"
+                echo "==> Base network was NOT created"
         fi
 }
 

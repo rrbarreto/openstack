@@ -1,0 +1,50 @@
+heat_template_version: 2016-10-14
+description: spawning a custom pfsense server
+
+parameters:
+  server_name:
+    type: string
+    description: Name of the server
+  image:
+    type: string
+    description: Image used for servers
+  key_name:
+    type: string
+    description: SSH key to connect to the servers
+  flavor:
+    type: string
+    description: flavor used by the servers
+  public_net:
+    type: string
+    description: Name of public network into which servers get deployed
+  private_net:
+    type: string
+    description: Name of private network into which servers get deployed
+
+resources:
+  server_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: private_net }
+      port_security_enabled: false
+
+  server:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: server_name }
+      flavor: { get_param: flavor }
+      image: { get_param: image }
+      key_name: { get_param: key_name }   
+      networks:
+        - port: { get_resource: server_port }
+
+  floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+
+  association:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: floating_ip }
+      port_id: { get_resource: server_port }
